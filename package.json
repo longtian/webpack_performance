@@ -1,0 +1,27 @@
+{
+  "name": "webpack_performance",
+  "version": "0.0.1",
+  "description": "Performance tips for webpack usage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wyvernnot/webpack_performance.git"
+  },
+  "keywords": [
+    "webpack",
+    "performance",
+    "demo"
+  ],
+  "author": "wyvernnot",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/wyvernnot/webpack_performance/issues"
+  },
+  "homepage": "https://github.com/wyvernnot/webpack_performance#readme",
+  "devDependencies": {
+    "moment": "^2.10.3"
+  }
+}
