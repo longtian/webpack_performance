@@ -3,14 +3,17 @@
 ## 前言
 
 Webpack 是 OneAPM 前端技术栈中很重要的一部分，它非常好用，如果你还不了解它，建议你阅读这篇 [Webpack 入门指迷](http://segmentfault.com/a/1190000002551952) 
-，在 OneAPM 我们用它打包前端的很多静态资源，在接下来的日子里，我们将通过一些列的文章和业界分享我们在使用 Webpack 过程中关于性能方面的经验。
+，在 OneAPM 我们用它完成打包静态资源，转换 ES6 的代码，组织 React 组件等，在接下来的日子里，我们将通过一些列的文章和业界分享我们在使用 Webpack 过程中关于性能方面的经验。
 
-### 必要的准备
+作为系列文章的第一篇，我们先来认识一下 Webpack 中的 `resolve.alias` ，也就是请求重定向。不过请注意，Webpack 里的请求是对模块的依赖，也就是一个 `require` 语句，而不是一个 HTTP 请求。
+文章会结合一个简单的例子，一步步地介绍如何把 Webpack 打包的过程从 650ms 缩减到 76ms。
+
+**必要的准备**
 
 - 需要你有一定的 Node.js 基础
-- 电脑上装有 webpack 的最新版本 
+- 电脑上装有最新版的 Webpack (`npm install webpack -g`)
 
-### 例子：本地时钟
+**例子：本地时钟**
 
 要实现的功能很简单，就是在页面上用中文显示当前时间，需要用到 [`moment`](http://momentjs.com/) 这个库，这个库封装了很多和日期相关的函数，而且自带了国际化的支持。
 
@@ -18,14 +21,14 @@ Webpack 是 OneAPM 前端技术栈中很重要的一部分，它非常好用，�
 
 使用 `npm init` 初始化你的项目，然后通过 `npm install moment -D` 加上 `moment` 的开发者依赖。
 
-新建一个 `entry.js` 作为入口文件，当然你也可以用 `app.js` 这样的名字，只是大部分的 webpack 的示例都是用的是 `entry.js`。
+新建一个 `entry.js` 作为入口文件，当然你也可以用 `app.js` 这样的名字，只是大部分的 Webpack 示例都是用的是 `entry.js`。
 
 ```js
 var moment = require('moment');
 document.write(moment().locale('zh-cn').format('LLLL'));
 ```
 
-新建一个页面 `index.html`, 引用 `bundle.js` 
+新建一个页面 `index.html`, 引用 `bundle.js`:
 
 ```html
 <body>
@@ -34,13 +37,13 @@ document.write(moment().locale('zh-cn').format('LLLL'));
 </body>
 ```
 
-此时的文件目录看起来是这样的
+此时的文件目录看起来是这样的:
 
 ```text
 index.html
 package.json
 entry.js
-node_modules/moment/**
+node_modules/moment
 ```
 
 到目前为止 `bundle.js` 这个文件还不存在，不过别着急，接下来的工作就交给 `webpack` 来完成。
@@ -54,7 +57,7 @@ entry.js    --------+               |
 node_modules/moment-+                                                                                                      
 ```       
 
-Webpack 会把 `entry.js` 和 `moment` 模块一起打包成一个 bundle.js 文件。怎么样，是不是已经听到 Clock App 滴答作响了！
+如图，Webpack 会把 `entry.js` 和 `moment` 模块一起打包成一个 bundle.js 文件。怎么样，是不是已经听到 Clock App 滴答作响了！
 
 ### 使用 webpack 打包代码
 
@@ -84,15 +87,15 @@ bundle.js  378 kB       0  [emitted]  null
 
 ```
 webpack --entry ./entry.js --output-path dist --output-file bundle.js \
---profile \
 --colors \
+--profile \
 --display-modules
 ```
 
 不过这次新增加了三个参数，这三个参数的含义分别是：
 
-- `--profile` 输出性能数据，可以看到每一步的耗时
 - `--colors` 输出结果带彩色，比如：会用红色显示耗时较长的步骤
+- `--profile` 输出性能数据，可以看到每一步的耗时
 - `--display-modules` 默认情况下 `node_modules` 下的模块会被隐藏，加上这个参数可以显示这些被隐藏的模块
 
 这次命令行的结果已经很有参考价值，可以帮助我们定位耗时比较长的步骤
@@ -150,7 +153,7 @@ var moment = require('moment/min/moment-with-locales.min.js');
   }
 ```
 
-这样待打包的脚本中的 `require('moment');` 其实就等价于 `require('moment/min/moment-with-locales.min.js');` 。通过别名的使用在本例中可以减少几乎一半的时间
+这样待打包的脚本中的 `require('moment');` 其实就等价于 `require('moment/min/moment-with-locales.min.js');` 。通过别名的使用在本例中可以减少几乎一半的时间。
 
 ```
 Hash: cdea65709b783ee0741a
@@ -166,13 +169,13 @@ bundle.js  148 kB       0  [emitted]  main
        [0] 20ms -> [1] 271ms -> factory:3ms building:1ms = 295ms
 
 WARNING in ../~/moment/min/moment-with-locales.min.js
-Module not found: Error: Cannot resolve 'file' or 'directory' ./locale in /home/yan/webstorm/webpack_performance/node_modules/moment/min
+Module not found: Error: Cannot resolve 'file' or 'directory' ./locale in */webpack_performance/node_modules/moment/min
  @ ../~/moment/min/moment-with-locales.min.js 1:2731-2753
 ```
 
 ### 在 Webpack 中忽略对已知文件的解析
 
-`module.noParse` 是 `webpack` 的另一个很有用的功能，如果你 **确定一个模块中没有新的依赖** 就可以配置这项
+`module.noParse` 是 `webpack` 的另一个很有用的功能，如果你 **确定一个模块中没有其它新的依赖** 就可以配置这项，`webpack` 将不再扫描这个文件中的依赖。
 
 ```
   module: {
@@ -180,7 +183,8 @@ Module not found: Error: Cannot resolve 'file' or 'directory' ./locale in /home/
   }
 ```
 
-这样修改，再结合前面重命名的例子，当 `webpack` 遇到 `moment` 依赖的时候，首先重定向到 `moment-with-locales`，不会再去解析 m
+这样修改，再结合前面重命名的例子，最新的流程是： 首先，`webpack` 检查到对 `moment` 的依赖请求；然后，重定向到 `moment-with-locales`；
+最后，发现匹配 `moment-with-locales` 的规则，所以 `webpack` 就直接把它打包进了 `bundle.js` 。
 
 ```
 Hash: 907880ed7638b4ed70b9
@@ -194,35 +198,28 @@ bundle.js  147 kB       0  [emitted]  main
        [0] 26ms -> factory:13ms building:5ms = 44ms
 ```
 
-时间进一步被压缩到 76ms
+时间进一步被压缩，只需要 76ms，比前一步还减少了 75%。
 
 ### 在 Webpack 中使用公用 CDN
 
-`webpack` 是如此的强大，用其打包的脚本可以运行在多种环境下，Web 环境只是默认的一种。
-
-另一方面，CDN 服务。配置
+`webpack` 是如此的强大，用其打包的脚本可以运行在多种环境下，Web 环境只是其默认的一种，也是最常用的一种。考虑到 Web 上有很多的公用 CDN 服务，那么
+怎么将 Webpack 和公用的 CDN 结合使用呢？方法是使用 `externals` 声明一个外部依赖。
 
 ```
   externals: {
-    moment: "var moment"
+    moment: true
   }
 ```
 
 当然了代码里需要加上一行
+
 ```
 <script src="//apps.bdimg.com/libs/moment/2.8.3/moment-with-locales.min.js"></script>
 ```
 
-这次结果是
-```
-Hash: 50f92af8097a14fd5d08
-Version: webpack 1.10.0
-Time: 49ms
-    Asset     Size  Chunks             Chunk Names
-bundle.js  1.62 kB       0  [emitted]  main
-   [0] ./entry.js 125 bytes {0} [built]
-       factory:15ms building:10ms = 25ms
-    + 1 hidden modules
-``` 
+这次打包，结果只用了 49 ms。几乎已经达到了极限。
 
-耗时: 49ms
+## 总结
+
+本文结合本地时钟的例子，展示了定位 Webpack 性能问题的步骤，以及所需要的两个参数 ：`--display-modules` 和 `--profile`。然后，重点介绍了 `resolve.alias` 
+即利用别名做重定向的方法和场景，在此基础上，配合 `module.noParse` 忽略某些模块的解析可以进一步加快速度。最后介绍了用 `externals` 定义外部依赖方法来使用公用 CDN。
