@@ -26,7 +26,7 @@ common.js  3.55 kB       1  [emitted]  common.js
 打开 `bundle.js`，发现所有的换行和注释都保留着，所有的变量名都原汁原味，这些问题很容易通过 `uglify` 来解决。
 但是由于 `uglify` 以后代码可读性就会大大降低，这样就不容易发现隐藏的其它问题，所以我们先不急着 `uglify` 而是先看看生成的代码。
 
-不难发现，为了调试的需要，React 的源码里有很多地方检测了当前环境。
+不难发现，为了调试的需要，React 发布在 NPM 上的源码里有很多地方检测了当前环境。
 
 ```js
 if (process.env.NODE_ENV !== 'production') {
