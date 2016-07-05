@@ -8,7 +8,6 @@
 
 [具体的介绍可以看这个链接](https://github.com/thejameskyle/babel-handbook/blob/master/translations/zh-Hans/user-handbook.md#babel-runtime)
 
-
 ## 启用前后的差别
 
 **引入 `BabelRuntime` 前**
@@ -33,3 +32,11 @@
 
 只减少了 5 kb，可见 `Gzip` 在压缩字符串的时候还是很给力的。
 
+## 其它技术细节
+
+除了合并 Babel 助手方法， `babel-runtime` 还有其他两个作用
+
+- 使用 `generator/sync` 的时候自动加载 `babel-runtime/regenerator` 依赖
+- 使用 `Promise` 和 `Object.assign` 的时候自动加载 `babel-runtime/core-js`
+
+[原文](http://babeljs.io/docs/plugins/transform-runtime/#technical-details)
