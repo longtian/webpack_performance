@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>合并 Babel 助手方法 | Webpack Performance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Babel 在转换一个文件的时候会加上一些助手方法，这些助手方法会完成诸如创建类，检查类构造函数调用等功能。其实就是用 ES5 来实现 ES6 相关特性的代码。
+这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。因此 Babel 项目单独抽出了一个模块叫做 babel-runtime。用于存放公共助手方法。
+具体的介绍可以看这个链接
+启用前后的差别引入 BabelRuntim">
+<meta property="og:type" content="article">
+<meta property="og:title" content="合并 Babel 助手方法">
+<meta property="og:url" content="http://webpack-performance.com/2016/05/16/babel-runtime/index.html">
+<meta property="og:site_name" content="Webpack Performance">
+<meta property="og:description" content="Babel 在转换一个文件的时候会加上一些助手方法，这些助手方法会完成诸如创建类，检查类构造函数调用等功能。其实就是用 ES5 来实现 ES6 相关特性的代码。
+这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。因此 Babel 项目单独抽出了一个模块叫做 babel-runtime。用于存放公共助手方法。
+具体的介绍可以看这个链接
+启用前后的差别引入 BabelRuntim">
+<meta property="og:updated_time" content="2016-08-25T09:42:35.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="合并 Babel 助手方法">
+<meta name="twitter:description" content="Babel 在转换一个文件的时候会加上一些助手方法，这些助手方法会完成诸如创建类，检查类构造函数调用等功能。其实就是用 ES5 来实现 ES6 相关特性的代码。
+这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。因此 Babel 项目单独抽出了一个模块叫做 babel-runtime。用于存放公共助手方法。
+具体的介绍可以看这个链接
+启用前后的差别引入 BabelRuntim">
+  
+    <link rel="alternate" href="/atom.xml" title="Webpack Performance" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5P79DZ"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5P79DZ');</script>
+<!-- End Google Tag Manager -->
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Webpack Performance</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">关注 Webpack 的性能</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://webpack-performance.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+<a href="https://github.com/wyvernnot/webpack_performance">
+  <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png">
+</a>
+
+      <div class="outer">
+        <section id="main"><article id="post-babel-runtime" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/16/babel-runtime/" class="article-date">
+  <time datetime="2016-05-16T09:51:35.000Z" itemprop="datePublished">2016-05-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      合并 Babel 助手方法
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>Babel</code> 在转换一个文件的时候会加上一些助手方法，这些助手方法会完成诸如创建类，检查类构造函数调用等功能。<br>其实就是用 <code>ES5</code> 来实现 <code>ES6</code> 相关特性的代码。</p>
+<p>这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。<br>因此 <code>Babel</code> 项目单独抽出了一个模块叫做 <code>babel-runtime</code>。用于存放公共助手方法。</p>
+<p><a href="https://github.com/thejameskyle/babel-handbook/blob/master/translations/zh-Hans/user-handbook.md#babel-runtime" target="_blank" rel="external">具体的介绍可以看这个链接</a></p>
+<h2 id="启用前后的差别"><a href="#启用前后的差别" class="headerlink" title="启用前后的差别"></a>启用前后的差别</h2><p><strong>引入 <code>BabelRuntime</code> 前</strong></p>
+<p>2,915,331 bytes</p>
+<p><strong>引入 <code>BabelRuntime</code> 后</strong></p>
+<p>2,992,866 bytes</p>
+<p>减少了 77 KB</p>
+<h2 id="开启-Gzip-后，效果就不那么明显了"><a href="#开启-Gzip-后，效果就不那么明显了" class="headerlink" title="开启 Gzip 后，效果就不那么明显了"></a>开启 Gzip 后，效果就不那么明显了</h2><p><strong>引入 <code>babel-runtime</code> 前，<code>Gzip</code> 压缩结果</strong></p>
+<p>808,753 bytes</p>
+<p><strong>引入 <code>babel-runtime</code> 后，<code>Gzip</code> 压缩结果</strong></p>
+<p>803,013 bytes</p>
+<p>只减少了 5 kb，可见 <code>Gzip</code> 在压缩字符串的时候还是很给力的。</p>
+<h2 id="其它技术细节"><a href="#其它技术细节" class="headerlink" title="其它技术细节"></a>其它技术细节</h2><p>除了合并 Babel 助手方法， <code>babel-runtime</code> 还有其他两个作用</p>
+<ul>
+<li>使用 <code>generator/sync</code> 的时候自动加载 <code>babel-runtime/regenerator</code> 依赖</li>
+<li>使用 <code>Promise</code> 和 <code>Object.assign</code> 的时候自动加载 <code>babel-runtime/core-js</code></li>
+</ul>
+<p><a href="http://babeljs.io/docs/plugins/transform-runtime/#technical-details" target="_blank" rel="external">原文</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://webpack-performance.com/2016/05/16/babel-runtime/" data-id="cisa5oj4l0003kjdgkwpw2vfc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/04/25/statsd/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Webpack 关键指标监控</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/05/16/babel-runtime/">合并 Babel 助手方法</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/25/statsd/">Webpack 关键指标监控</a>
+          </li>
+        
+          <li>
+            <a href="/2016/02/24/compress/">压缩 JS</a>
+          </li>
+        
+          <li>
+            <a href="/2015/07/06/alias/">使用别名做重定向</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 wyvernnot<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//cdn.staticfile.org/jquery/2.2.1/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
