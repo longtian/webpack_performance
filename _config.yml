@@ -4,8 +4,8 @@
 
 # Site
 title: Webpack Performance
-subtitle: 关注 Webpack 的性能
-description: Webpack, React, Performance, APM
+subtitle: 专注于 Webpack 相关工具、性能和优化的博客
+description: Webpack, React, Performance, APM, ESLint
 author: wyvernnot
 language: zh
 timezone: Asia/Shanghai
