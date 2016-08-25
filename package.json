@@ -5,6 +5,7 @@
   "description": "Performance tips for webpack usage",
   "main": "index.js",
   "scripts": {
+    "new": "hexo new default",
     "clean": "hexo clean",
     "serve": "hexo serve",
     "generate": "hexo generate"
