@@ -68,4 +68,7 @@ theme: landscape
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: git@github.com:wyvernnot/webpack_performance.git
+  branch: gh-pages
+
