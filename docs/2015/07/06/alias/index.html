@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Webpack Performance</title>
+  <title>使用别名做重定向 | Webpack Performance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Webpack, React, Performance, APM">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Webpack Performance">
-<meta property="og:url" content="http://webpack-performance.com/index.html">
+  <meta name="description" content="前言Webpack 是 OneAPM 前端技术栈中很重要的一部分，它非常好用，如果你还不了解它，建议你阅读这篇 Webpack 入门指迷，在 OneAPM 我们用它完成静态资源打包，ES6 代码的转换 ，React 组件的组织等，在接下来的日子里，我们将通过一系列文章和业界分享我们在使用 Webpack 过程中关于性能方面的经验。
+作为系列文章的第一篇，我们会重点介绍 Webpack 中的 res">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用别名做重定向">
+<meta property="og:url" content="http://webpack-performance.com/2015/07/06/alias/index.html">
 <meta property="og:site_name" content="Webpack Performance">
-<meta property="og:description" content="Webpack, React, Performance, APM">
+<meta property="og:description" content="前言Webpack 是 OneAPM 前端技术栈中很重要的一部分，它非常好用，如果你还不了解它，建议你阅读这篇 Webpack 入门指迷，在 OneAPM 我们用它完成静态资源打包，ES6 代码的转换 ，React 组件的组织等，在接下来的日子里，我们将通过一系列文章和业界分享我们在使用 Webpack 过程中关于性能方面的经验。
+作为系列文章的第一篇，我们会重点介绍 Webpack 中的 res">
+<meta property="og:updated_time" content="2016-08-25T09:42:35.532Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Webpack Performance">
-<meta name="twitter:description" content="Webpack, React, Performance, APM">
+<meta name="twitter:title" content="使用别名做重定向">
+<meta name="twitter:description" content="前言Webpack 是 OneAPM 前端技术栈中很重要的一部分，它非常好用，如果你还不了解它，建议你阅读这篇 Webpack 入门指迷，在 OneAPM 我们用它完成静态资源打包，ES6 代码的转换 ，React 组件的组织等，在接下来的日子里，我们将通过一系列文章和业界分享我们在使用 Webpack 过程中关于性能方面的经验。
+作为系列文章的第一篇，我们会重点介绍 Webpack 中的 res">
   
     <link rel="alternate" href="/atom.xml" title="Webpack Performance" type="application/atom+xml">
   
@@ -78,237 +82,7 @@
 </a>
 
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-babel-runtime" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/16/babel-runtime/" class="article-date">
-  <time datetime="2016-05-16T09:51:35.000Z" itemprop="datePublished">2016-05-16</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/16/babel-runtime/">合并 Babel 助手方法</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><code>Babel</code> 在转换一个文件的时候会加上一些助手方法，这些助手方法会完成诸如创建类，检查类构造函数调用等功能。<br>其实就是用 <code>ES5</code> 来实现 <code>ES6</code> 相关特性的代码。</p>
-<p>这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。<br>因此 <code>Babel</code> 项目单独抽出了一个模块叫做 <code>babel-runtime</code>。用于存放公共助手方法。</p>
-<p><a href="https://github.com/thejameskyle/babel-handbook/blob/master/translations/zh-Hans/user-handbook.md#babel-runtime" target="_blank" rel="external">具体的介绍可以看这个链接</a></p>
-<h2 id="启用前后的差别"><a href="#启用前后的差别" class="headerlink" title="启用前后的差别"></a>启用前后的差别</h2><p><strong>引入 <code>BabelRuntime</code> 前</strong></p>
-<p>2,915,331 bytes</p>
-<p><strong>引入 <code>BabelRuntime</code> 后</strong></p>
-<p>2,992,866 bytes</p>
-<p>减少了 77 KB</p>
-<h2 id="开启-Gzip-后，效果就不那么明显了"><a href="#开启-Gzip-后，效果就不那么明显了" class="headerlink" title="开启 Gzip 后，效果就不那么明显了"></a>开启 Gzip 后，效果就不那么明显了</h2><p><strong>引入 <code>babel-runtime</code> 前，<code>Gzip</code> 压缩结果</strong></p>
-<p>808,753 bytes</p>
-<p><strong>引入 <code>babel-runtime</code> 后，<code>Gzip</code> 压缩结果</strong></p>
-<p>803,013 bytes</p>
-<p>只减少了 5 kb，可见 <code>Gzip</code> 在压缩字符串的时候还是很给力的。</p>
-<h2 id="其它技术细节"><a href="#其它技术细节" class="headerlink" title="其它技术细节"></a>其它技术细节</h2><p>除了合并 Babel 助手方法， <code>babel-runtime</code> 还有其他两个作用</p>
-<ul>
-<li>使用 <code>generator/sync</code> 的时候自动加载 <code>babel-runtime/regenerator</code> 依赖</li>
-<li>使用 <code>Promise</code> 和 <code>Object.assign</code> 的时候自动加载 <code>babel-runtime/core-js</code></li>
-</ul>
-<p><a href="http://babeljs.io/docs/plugins/transform-runtime/#technical-details" target="_blank" rel="external">原文</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://webpack-performance.com/2016/05/16/babel-runtime/" data-id="cisa56oaz0001ovdgjgs1a4yt" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-statsd" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/04/25/statsd/" class="article-date">
-  <time datetime="2016-04-25T06:13:05.000Z" itemprop="datePublished">2016-04-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/25/statsd/">Webpack 关键指标监控</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>吃自己的狗食</code> 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在<br>公司内部做一个测试。通过 <code>吃自己的狗食</code> 可以及早的发现程序中的问题。</p>
-<h3 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h3><p>CloudInsight 是 OneAPM 在 2016 年初正式发布的一款性能监控的产品。它的前端采用了 React 来编写。<br>并使用 Webpack 来打包。每次前端发版的时候必须在程序员的电脑上 check out 最新代码，然后运行一些列的脚本。<br>在经历了两次加班到九点以后，我们觉得很有必要把打包的过程自动化。</p>
-<h2 id="数据采集"><a href="#数据采集" class="headerlink" title="数据采集"></a>数据采集</h2><p>无论是 Webpack, Grunt 还是 Gulp, 它们都有一个很显著的特点，就是极易于扩展。对这样的工具来说，开发插件的简易程度<br>有的时候直接决定了这套工具能获得多么广泛的生态系统。</p>
-<p>因此，要取得 Webpack 打包过程中的指标可以优先考虑使用插件的方式。</p>
-<h2 id="编写-Webpack-插件"><a href="#编写-Webpack-插件" class="headerlink" title="编写 Webpack 插件"></a>编写 Webpack 插件</h2><p>Webpack 官网上有一篇详细的文章指导开发者如何编写 Webpack 插件</p>
-<p><a href="http://webpack.github.io/docs/how-to-write-a-plugin.html" target="_blank" rel="external">http://webpack.github.io/docs/how-to-write-a-plugin.html</a></p>
-<p>摘录 HelloWorld 插件的代码如下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">HelloWorldPlugin</span>(<span class="params">options</span>) </span>&#123;</div><div class="line">  <span class="comment">// Setup the plugin instance with options...</span></div><div class="line">&#125;</div><div class="line"></div><div class="line">HelloWorldPlugin.prototype.apply = <span class="function"><span class="keyword">function</span>(<span class="params">compiler</span>) </span>&#123;</div><div class="line">  compiler.plugin(<span class="string">'done'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="built_in">console</span>.log(<span class="string">'Hello World!'</span>);</div><div class="line">  &#125;);</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="built_in">module</span>.exports = HelloWorldPlugin;</div></pre></td></tr></table></figure>
-<p>只需要实现 apply 方法即可。在 apply 方法中可以监听 Webpack 的各种事件。</p>
-<table>
-<thead>
-<tr>
-<th>事件名</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>done</td>
-<td>完成</td>
-</tr>
-</tbody>
-</table>
-<h3 id="选择时间点"><a href="#选择时间点" class="headerlink" title="选择时间点"></a>选择时间点</h3><p>Compiler 有点像一个 EventEmitter。打包完成的时候会触发一个 done 事件，我们只要监听这个事件就可以。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">compiler.plugin(<span class="string">'done'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">compilation</span>) </span>&#123;</div><div class="line"></div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-<p>回调的第一个参数是 compilation ，包含了这次打包几乎所有的信息。</p>
-<p>例如要获得打包过程中的所有警告的个数：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compilation.toJson().warnings.length</div></pre></td></tr></table></figure>
-<p>这样我们就得到了一个指标：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">webpack.warnings.count</div></pre></td></tr></table></figure>
-<p>那么哪些是我们需要重点关注的指标呢</p>
-<h2 id="定义指标"><a href="#定义指标" class="headerlink" title="定义指标"></a>定义指标</h2><table>
-<thead>
-<tr>
-<th>指标</th>
-<th>介绍</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>webpack.asset.kb_size</td>
-<td>单个输出文件的大小</td>
-</tr>
-<tr>
-<td>webpack.assets.count</td>
-<td>输出文件的个数</td>
-</tr>
-<tr>
-<td>webpack.assets.sum.kb_size</td>
-<td>输出文件的合计大小</td>
-</tr>
-<tr>
-<td>webpack.chunks.count</td>
-<td>分块总计</td>
-</tr>
-<tr>
-<td>webpack.errors.count</td>
-<td>错误个数</td>
-</tr>
-<tr>
-<td>webpack.warnings.count</td>
-<td>警告个数</td>
-</tr>
-<tr>
-<td>webpack.modules.count</td>
-<td>模块个数</td>
-</tr>
-<tr>
-<td>webpack.time.ms</td>
-<td>构建时间</td>
-</tr>
-</tbody>
-</table>
-<h2 id="标签系统"><a href="#标签系统" class="headerlink" title="标签系统"></a>标签系统</h2><p><code>avg:webpack.asset.kb_size {name=main.js}</code></p>
-<p><code>avg:webpack.asset.kb_size</code></p>
-<p>|——-|——-|<br>|builder|打包的机器|<br>|env    |环境     |</p>
-<h2 id="数据展现"><a href="#数据展现" class="headerlink" title="数据展现"></a>数据展现</h2><h2 id="自定义参数"><a href="#自定义参数" class="headerlink" title="自定义参数"></a>自定义参数</h2><h2 id="生成报表"><a href="#生成报表" class="headerlink" title="生成报表"></a>生成报表</h2><h2 id="处理-stats-js"><a href="#处理-stats-js" class="headerlink" title="处理 stats.js"></a>处理 stats.js</h2>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://webpack-performance.com/2016/04/25/statsd/" data-id="cisa56oau0000ovdg51wl1d13" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-compress" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/24/compress/" class="article-date">
-  <time datetime="2016-02-24T05:55:49.000Z" itemprop="datePublished">2016-02-24</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/24/compress/">压缩 JS</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>大家新年好 ^^，这是 <a href="https://github.com/wyvernnot/webpack_performance" target="_blank" rel="external">Webpack 性能优化</a> 系列文章的第二篇。<br>在这篇里我们来通过一个实际的例子来看看如何在 Webpack 打包的时候启用压缩。</p>
-<p>这个例子是由 Github 网友 <code>@zjy01</code> 提供的: <a href="https://github.com/zjy01/react_and_redux_and_router_example" target="_blank" rel="external">react_and_redux_and_router_example</a></p>
-<p><strong>在不做任何更改的情况下</strong></p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">webpack --config webpack.static.config.js</div></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Time: 1726ms</div><div class="line">    Asset     Size  Chunks             Chunk Names</div><div class="line">bundle.js   949 kB    0, 1  [emitted]  bundle</div><div class="line">common.js  3.55 kB       1  [emitted]  common.js</div><div class="line">    + 257 hidden modules</div></pre></td></tr></table></figure>
-<p>输出文件加起来将近 1 MB。</p>
-<p>打开 <code>bundle.js</code>，发现所有的换行和注释都保留着，所有的变量名都原汁原味，这些问题很容易通过 <code>uglify</code> 来解决。<br>但是由于 <code>uglify</code> 以后代码可读性就会大大降低，这样就不容易发现隐藏的其它问题，所以我们先不急着 <code>uglify</code> 而是先看看生成的代码。</p>
-<p>不难发现，为了调试的需要，React 发布在 NPM 上的源码里有很多地方检测了当前环境。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (process.env.NODE_ENV !== <span class="string">'production'</span>) &#123;</div><div class="line">  <span class="comment">// 如果不是产品环境就怎样怎样</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="使用-DefinePlugin-消除环境监测的代码"><a href="#使用-DefinePlugin-消除环境监测的代码" class="headerlink" title="使用 DefinePlugin 消除环境监测的代码"></a>使用 DefinePlugin 消除环境监测的代码</h2><p>通过编辑 webpack 的配置文件，加上 DefinePlugin，把 process.env.NODE_ENV 替换掉</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line"> plugins:[</div><div class="line">    ...</div><div class="line">    new webpack.DefinePlugin(&#123;</div><div class="line">      <span class="string">'process.env'</span>: &#123;</div><div class="line">          <span class="string">'NODE_ENV'</span>: <span class="built_in">JSON</span>.stringify(process.env.NODE_ENV)</div><div class="line">      &#125;</div><div class="line">    &#125;)</div><div class="line"> ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>再次执行</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NODE_ENV=production webpack --config webpack.static.config.js</div></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Time: 1859ms</div><div class="line">    Asset     Size  Chunks             Chunk Names</div><div class="line">bundle.js   932 kB    0, 1  [emitted]  bundle</div><div class="line">common.js  3.55 kB       1  [emitted]  common.js</div><div class="line">    + 256 hidden modules</div></pre></td></tr></table></figure>
-<p>仅仅减小了 16 kB左右，这是因为 DefinePlugin 只会做简单的替换，之前有关环境检测的代码替换后如下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (<span class="literal">false</span>) &#123;</div><div class="line">  <span class="comment">// 如果不是产品环境就怎样怎样</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>实际上 if 块里的代码已经变成了 <code>dead code</code> ，即死区，永远都不会被执行到。而清除代码死区正是 <code>uglifyjs</code> 非常擅长的地方。</p>
-<h2 id="使用-uglifyjs-压缩代码"><a href="#使用-uglifyjs-压缩代码" class="headerlink" title="使用 uglifyjs 压缩代码"></a>使用 uglifyjs 压缩代码</h2><p>在前端打包的流程中，<code>uglify</code> 操作是如此的常见以至于被内置进了 <code>webpack</code> 里，使用的时候加上 <code>--optimize-minimize</code> 参数即可。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NODE_ENV=production webpack --config webpack.static.config.js --optimize-minimize</div></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Time: 4059ms</div><div class="line">    Asset       Size  Chunks             Chunk Names</div><div class="line">bundle.js     223 kB    0, 1  [emitted]  bundle</div><div class="line">common.js  735 bytes       1  [emitted]  common.js</div><div class="line">    + 252 hidden modules</div></pre></td></tr></table></figure>
-<h2 id="关于"><a href="#关于" class="headerlink" title="关于"></a>关于</h2><p>webpack 版本 1.12.14</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过这篇文章，简单介绍了如何在 Webpack 打包的时候启用压缩，重点在于消除环境相关的代码。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://webpack-performance.com/2016/02/24/compress/" data-id="cisa56ob40002ovdgi3d769rb" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-alias" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-alias" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/07/06/alias/" class="article-date">
   <time datetime="2015-07-06T09:47:55.000Z" itemprop="datePublished">2015-07-06</time>
@@ -321,8 +95,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/alias/">使用别名做重定向</a>
+    <h1 class="article-title" itemprop="name">
+      使用别名做重定向
     </h1>
   
 
@@ -399,10 +173,23 @@
     </footer>
   </div>
   
-</article>
-
+    
+<nav id="article-nav">
+  
+    <a href="/2016/02/24/compress/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          压缩 JS
+        
+      </div>
+    </a>
+  
+  
+</nav>
 
   
+</article>
 
 </section>
         
