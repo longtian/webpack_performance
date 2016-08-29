@@ -10,6 +10,8 @@ tags:
 这些代码如果每个文件生成的时候都带上，必然会增加项目打包结果的整体大小。
 因此 `Babel` 项目单独抽出了一个模块叫做 `babel-runtime`。用于存放公共助手方法。
 
+<!-- more -->
+
 [具体的介绍可以看这个链接](https://github.com/thejameskyle/babel-handbook/blob/master/translations/zh-Hans/user-handbook.md#babel-runtime)
 
 ## 启用前后的差别
