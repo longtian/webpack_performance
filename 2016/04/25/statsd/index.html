@@ -5,19 +5,16 @@
   
   <title>Webpack 关键指标监控 | Webpack Performance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。
-背景介绍CloudInsight 是 OneAPM 在 2016 年初正式发布的一款性能监控的产品。它的前端采用了 React 来编写。并使用 Webpack 来打包。每次前端发版的时候必须在程序员的电脑上 che">
+  <meta name="description" content="吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Webpack 关键指标监控">
 <meta property="og:url" content="http://webpack-performance.com/2016/04/25/statsd/index.html">
 <meta property="og:site_name" content="Webpack Performance">
-<meta property="og:description" content="前言吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。
-背景介绍CloudInsight 是 OneAPM 在 2016 年初正式发布的一款性能监控的产品。它的前端采用了 React 来编写。并使用 Webpack 来打包。每次前端发版的时候必须在程序员的电脑上 che">
-<meta property="og:updated_time" content="2016-08-25T09:42:35.532Z">
+<meta property="og:description" content="吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。">
+<meta property="og:updated_time" content="2016-08-29T09:14:57.490Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Webpack 关键指标监控">
-<meta name="twitter:description" content="前言吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。
-背景介绍CloudInsight 是 OneAPM 在 2016 年初正式发布的一款性能监控的产品。它的前端采用了 React 来编写。并使用 Webpack 来打包。每次前端发版的时候必须在程序员的电脑上 che">
+<meta name="twitter:description" content="吃自己的狗食 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在公司内部做一个测试。通过 吃自己的狗食 可以及早的发现程序中的问题。">
   
     <link rel="alternate" href="/atom.xml" title="Webpack Performance" type="application/atom+xml">
   
@@ -104,7 +101,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>吃自己的狗食</code> 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在<br>公司内部做一个测试。通过 <code>吃自己的狗食</code> 可以及早的发现程序中的问题。</p>
+        <p><code>吃自己的狗食</code> 是一个很有趣的文化。意思大致就是鼓励 IT 企业要使用自己的产品。比如淘宝每次发布新的版本前都会在<br>公司内部做一个测试。通过 <code>吃自己的狗食</code> 可以及早的发现程序中的问题。</p>
+<a id="more"></a>
 <h3 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h3><p>CloudInsight 是 OneAPM 在 2016 年初正式发布的一款性能监控的产品。它的前端采用了 React 来编写。<br>并使用 Webpack 来打包。每次前端发版的时候必须在程序员的电脑上 check out 最新代码，然后运行一些列的脚本。<br>在经历了两次加班到九点以后，我们觉得很有必要把打包的过程自动化。</p>
 <h2 id="数据采集"><a href="#数据采集" class="headerlink" title="数据采集"></a>数据采集</h2><p>无论是 Webpack, Grunt 还是 Gulp, 它们都有一个很显著的特点，就是极易于扩展。对这样的工具来说，开发插件的简易程度<br>有的时候直接决定了这套工具能获得多么广泛的生态系统。</p>
 <p>因此，要取得 Webpack 打包过程中的指标可以优先考虑使用插件的方式。</p>
@@ -184,7 +182,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://webpack-performance.com/2016/04/25/statsd/" data-id="cisa6lzcz0001vudgaol6bxwd" class="article-share-link">Share</a>
+      <a data-url="http://webpack-performance.com/2016/04/25/statsd/" data-id="cisfrp5fr0003hrdg68atnu9j" class="article-share-link">Share</a>
       
       
     </footer>
@@ -221,15 +219,29 @@
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/jenkins/">jenkins</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/jenkins/" style="font-size: 10px;">jenkins</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
     </div>
   </div>
 
@@ -240,6 +252,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/08/29/nodejs_in_jenkins_on_docker/">基于 Docker 搭建 Node.js + Jenkins 环境</a>
+          </li>
         
           <li>
             <a href="/2016/05/16/babel-runtime/">合并 Babel 助手方法</a>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>基于 Docker 搭建 Node.js + Jenkins 环境 | Webpack Performance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="要实现 Webpack 项目的持续集成和持续部署需要使用 Jenkins 这一工具。通过本文，你可以了解到怎样在 Docker 里运行 Jenkins 最新的 2.x 版本和 Jenkins Slave，并基于此搭建一个多版本、可伸缩的 Node.js 执行环境。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Docker 搭建 Node.js + Jenkins 环境">
+<meta property="og:url" content="http://webpack-performance.com/2016/08/29/nodejs_in_jenkins_on_docker/index.html">
+<meta property="og:site_name" content="Webpack Performance">
+<meta property="og:description" content="要实现 Webpack 项目的持续集成和持续部署需要使用 Jenkins 这一工具。通过本文，你可以了解到怎样在 Docker 里运行 Jenkins 最新的 2.x 版本和 Jenkins Slave，并基于此搭建一个多版本、可伸缩的 Node.js 执行环境。">
+<meta property="og:image" content="http://webpack-performance.com/./unlock_jenkins.png">
+<meta property="og:image" content="http://webpack-performance.com/./create_first_admin.png">
+<meta property="og:image" content="http://webpack-performance.com/./jenkins_is_ready.png">
+<meta property="og:image" content="http://webpack-performance.com/./slave01_created.png">
+<meta property="og:image" content="http://webpack-performance.com/./nodejs_plugin_filtering.png">
+<meta property="og:image" content="http://webpack-performance.com/./restart.png">
+<meta property="og:image" content="http://webpack-performance.com/./nodejs_installation.png">
+<meta property="og:image" content="http://webpack-performance.com/./demo_pipeline.png">
+<meta property="og:image" content="http://webpack-performance.com/./pipeline_jenkinsfile_config.png">
+<meta property="og:image" content="http://webpack-performance.com/./nodejs_stage_view.png">
+<meta property="og:updated_time" content="2016-08-29T09:15:57.310Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 Docker 搭建 Node.js + Jenkins 环境">
+<meta name="twitter:description" content="要实现 Webpack 项目的持续集成和持续部署需要使用 Jenkins 这一工具。通过本文，你可以了解到怎样在 Docker 里运行 Jenkins 最新的 2.x 版本和 Jenkins Slave，并基于此搭建一个多版本、可伸缩的 Node.js 执行环境。">
+<meta name="twitter:image" content="http://webpack-performance.com/./unlock_jenkins.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Webpack Performance" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5P79DZ"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5P79DZ');</script>
+<!-- End Google Tag Manager -->
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Webpack Performance</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">专注于 Webpack 相关工具、性能和优化的博客</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://webpack-performance.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+<a href="https://github.com/wyvernnot/webpack_performance">
+  <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png">
+</a>
+
+      <div class="outer">
+        <section id="main"><article id="post-nodejs_in_jenkins_on_docker" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/29/nodejs_in_jenkins_on_docker/" class="article-date">
+  <time datetime="2016-08-29T05:41:47.000Z" itemprop="datePublished">2016-08-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      基于 Docker 搭建 Node.js + Jenkins 环境
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>要实现 <code>Webpack</code> 项目的持续集成和持续部署需要使用 <code>Jenkins</code> 这一工具。通过本文，你可以了解到怎样在 <code>Docker</code> 里运行 <code>Jenkins</code> 最新的 <code>2.x</code> 版本和 <code>Jenkins Slave</code>，并基于此搭建一个多版本、可伸缩的 <code>Node.js</code> 执行环境。 </p>
+<a id="more"></a>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>一个稳定的 <code>Docker</code> 环境，一点点 <code>Docker</code> 的基础知识</li>
+<li>了解 <code>Jenkins</code> 在 <code>持续集成/持续部署</code> 实践中的作用</li>
+</ul>
+<h1 id="启动-Jenkins-容器"><a href="#启动-Jenkins-容器" class="headerlink" title="启动 Jenkins 容器"></a>启动 Jenkins 容器</h1><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run <span class="_">-d</span> -p 8080:8080 --name jenkins jenkins:2.7.2</div></pre></td></tr></table></figure>
+<p><strong>下载速度慢别着急</strong></p>
+<p>如果你在国内，一定会遇到网速不给力的情况。比如安装 <code>Docker Engine</code>，或者下载镜像的时候，总是卡的要死甚至有的时候下载链接被重置。这个时候可以选择一个国内的 Docker 加速器。</p>
+<h2 id="配置持久化"><a href="#配置持久化" class="headerlink" title="配置持久化"></a>配置持久化</h2><p>可以在执行 <code>docker run</code> 的时候增加一个 <code>-v</code> 参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run -d -p 8080:8080 -v /your/home:/var/jenkins_home --name jenkins jenkins:2.7.2</div></pre></td></tr></table></figure>
+<p>如果只是简单的实验，在启动 <code>Jenkins</code> 的时候不用指定 <code>Volume</code>，但如果是产品环境，一定要指定一个 <code>Volume</code> 来实现持久化。只有这样用户列表，项目设置，安装的插件等设置才会被保留。</p>
+<h2 id="启动成功"><a href="#启动成功" class="headerlink" title="启动成功"></a>启动成功</h2><p>用浏览器打开 <code>http://localhost:8080</code>，看到的是 <code>Jenkins</code> 安装初始化的页面。</p>
+<p><img src="./unlock_jenkins.png" alt="Jenkins2 初始化页面"></p>
+<p>会提示输入 <code>admin</code> 帐号的密码，这个密码是在 <code>Jenkins</code> 初次启动的时候随机生成的，并一直保存在容器里。</p>
+<p>可以通过下面的命令查看 <code>admin</code> 的密码 （即查看容器里某个文件的内容）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</div></pre></td></tr></table></figure>
+<p>登录进去后需要选择初始化安装下载的插件，一般安装默认的插件列表即可。</p>
+<p>下一步，<code>Jenkins</code> 会提示你创建一个除了 admin 之外的管理员用户，可建可不建。</p>
+<p><img src="./create_first_admin.png" alt="Jenkins 创建用户"></p>
+<p>看到这个页面，就说明 Jenkins 安装成功了</p>
+<p><img src="./jenkins_is_ready.png" alt="Jenkins 安装成功"></p>
+<h1 id="添加-Slave-节点"><a href="#添加-Slave-节点" class="headerlink" title="添加 Slave 节点"></a>添加 Slave 节点</h1><h2 id="为什么使用-Slave"><a href="#为什么使用-Slave" class="headerlink" title="为什么使用 Slave"></a>为什么使用 Slave</h2><p>在我们团队使用 <code>Jenkins</code> 的过程中就遇到过这样的一件事：某个团队成员在 <code>Jenkins</code> 所在的系统下装了一个很彪悍的系统软件，把 <code>Home</code> 目录给整个加密了，结果 <code>Jenkins</code> 上的构建纷纷失败。</p>
+<p>这提示我们，持续集成的环境应当尽量保持独立，当多个用户共用同一个 <code>Jenkins Master</code> 节点的时候，很容易因为一个成员改变了机器配置而对另一个构建造成影响。</p>
+<p>所以，能用 <code>Slave</code> 做的事情尽量用 <code>Slave</code> 去做， 何况 <code>Docker</code> 里创建一个 <code>Slave</code> 是非常容易的事情。</p>
+<h2 id="新建-Slave-节点"><a href="#新建-Slave-节点" class="headerlink" title="新建 Slave 节点"></a>新建 Slave 节点</h2><p>在 <code>系统管理</code> <code>管理节点</code> 页面，点击左边的 <code>新建节点</code></p>
+<p>节点名称为 <code>slave01</code>，点击 <code>OK</code> 后自动进入节点设置页面</p>
+<p>配置标签为 <code>linux node</code> 中间有空格，启动方法保留默认的 <code>&#39;Launch agent via Java Web Start&#39;</code>， 然后保存</p>
+<p>从 <code>节点列表</code> 页面进入刚新建好的 <code>slave01</code> 节点，这个时候节点还不可以用，处在一个等待链接的状态</p>
+<p><img src="./slave01_created.png" alt="slave 节点"></p>
+<p>如图 <code>-secret</code> 后面跟的一段随机的密码字符串很重要，因为下面一步只有 <code>secret</code> 和 <code>name</code> 都一致才能连接成功。</p>
+<h2 id="启动-Slave-容器，连接节点"><a href="#启动-Slave-容器，连接节点" class="headerlink" title="启动 Slave 容器，连接节点"></a>启动 Slave 容器，连接节点</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run --link jenkins -d jenkinsci/jnlp-slave -url  http://jenkins:8080 50adcde27357f607b4b22c929b42e764561a80e0dca64119e49b447aaed6e53f slave01</div></pre></td></tr></table></figure>
+<p>启动容器后刷新 <code>Jenkins</code> 的节点列表， 很快 <code>slave01</code> 节点就变成可用的啦。</p>
+<h1 id="配置-NodeJS-Plugin"><a href="#配置-NodeJS-Plugin" class="headerlink" title="配置 NodeJS Plugin"></a>配置 NodeJS Plugin</h1><p><code>Jenkins</code> 的环境里默认是不带 <code>Node.js</code> 的，我们可以通过安装一个叫做 <code>NodeJS Plugin</code> 插件来实现 <code>Node.js</code> 的自动安装。</p>
+<h2 id="安装-Node-JS-插件"><a href="#安装-Node-JS-插件" class="headerlink" title="安装 Node.JS 插件"></a>安装 Node.JS 插件</h2><p>在 <code>系统管理</code> <code>管理插件</code> <code>可选插件</code> 页面，在过滤输入框里输入 <code>NodeJS</code></p>
+<p><img src="./nodejs_plugin_filtering.png" alt="Jenkins Nodejs Plugin"></p>
+<p>选中它并点击 <code>下载待重启后安装</code>，然后勾选 <code>安装完成后重启 Jenkins</code> 选项，等待插件安装完成 <code>Jenkins</code> 会自动重启。</p>
+<p><img src="./restart.png" alt="Jenkins 安装完成后重启"></p>
+<h2 id="配置-NodeJS-插件"><a href="#配置-NodeJS-插件" class="headerlink" title="配置 NodeJS 插件"></a>配置 NodeJS 插件</h2><p>在 <code>系统管理</code> <code>Global Tool Configuration</code> 页面，滚动到最下面的 <code>NodeJS 安装</code></p>
+<p><img src="./nodejs_installation.png" alt="NodeJS Plugin 配置"></p>
+<p>按照图示新建 <code>v6.4.0</code> 的版本，勾选 <code>自动安装</code> 选项，并在压缩包 URL 里填入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://npm.taobao.org/mirrors/node/v6.4.0/node-v6.4.0-linux-x64.tar.gz</div></pre></td></tr></table></figure>
+<p>这是目前国内最快最稳定的 NodeJS 下载源了，谢谢马云爸爸！</p>
+<h2 id="为什么使用-NodeJS-Plugin-来安装-Node-js"><a href="#为什么使用-NodeJS-Plugin-来安装-Node-js" class="headerlink" title="为什么使用 NodeJS Plugin 来安装 Node.js"></a>为什么使用 NodeJS Plugin 来安装 Node.js</h2><p>有这样几个好处：</p>
+<ul>
+<li>和 <code>Jenkins</code> 集成得最好，新添加的 <code>Slave</code> 节点会自动安装 Node.js 依赖</li>
+<li>避免了登录到 <code>Slave</code> 安装 Node.js 可能改变操作系统配置的问题</li>
+<li>可以在不同的构建里使用不同的 Node.js 版本</li>
+</ul>
+<h1 id="新建-Pipeline-项目"><a href="#新建-Pipeline-项目" class="headerlink" title="新建 Pipeline 项目"></a>新建 Pipeline 项目</h1><p>项目名为 demo ，以 <code>Jenkins</code> <code>2.x</code> 版本为例，类型选择为 <code>pipeline</code></p>
+<p><img src="./demo_pipeline.png" alt="Demo Pipeline 项目"></p>
+<h3 id="配置-Jenkinsfile"><a href="#配置-Jenkinsfile" class="headerlink" title="配置 Jenkinsfile"></a>配置 Jenkinsfile</h3><p>因为主要就是为了验证 <code>Node.js</code> 环境安装成功并且可用，所以 <code>Pipeline script</code> 只有两个 <code>Stage</code></p>
+<p><img src="./pipeline_jenkinsfile_config.png" alt="Node.js 项目 Jenkinsfile 配置"></p>
+<p>内容如下</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node (<span class="string">'node'</span>) &#123;</div><div class="line">   stage <span class="string">'安装 Node'</span></div><div class="line">   tool <span class="string">name:</span> <span class="string">'v6.4.0'</span>, <span class="string">type:</span> <span class="string">'jenkins.plugins.nodejs.tools.NodeJSInstallation'</span></div><div class="line">   env.PATH = <span class="string">"$&#123;tool 'v6.4.0'&#125;/node-v6.4.0-linux-x64/bin:$&#123;env.PATH&#125;"</span></div><div class="line"></div><div class="line">   stage <span class="string">'验证 Node'</span></div><div class="line">   sh <span class="string">"node -v"</span></div><div class="line">   sh <span class="string">"npm -v"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">node (&apos;node&apos;) &#123;</div></pre></td></tr></table></figure>
+<p>上面这行表示选中具有 <code>node</code> 标签的节点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tool name: &apos;v6.4.0&apos;, type: &apos;jenkins.plugins.nodejs.tools.NodeJSInstallation&apos;</div></pre></td></tr></table></figure>
+<p>上面这行指明了构建过程会用到我们之前配置的 <code>Node.js</code> 工具的 <code>v6.4.0</code> 版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">env.PATH = &quot;$&#123;tool &apos;v6.4.0&apos;&#125;/node-v6.4.0-linux-x64/bin:$&#123;env.PATH&#125;&quot;</div></pre></td></tr></table></figure>
+<p>上面这行会修改构建的 <code>PATH</code> 环境变量，否则会提示找不到 <code>node</code> 和 <code>npm</code> 命令</p>
+<p>点击 <code>保存</code>，然后点击 <code>立即构建</code>，这样我们的 <code>Node.JS</code> 环境就搭建成功了</p>
+<p><img src="./nodejs_stage_view.png" alt="Node.js stage view on Jenkins"></p>
+<h1 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h1><ul>
+<li>准备工作</li>
+<li>启动 <code>Jenkins</code> 容器，以 <code>admin</code> 登录，并完成 <code>Jenkins</code> 的初始化设置</li>
+<li>添加 <code>Slave</code> 节点，并连接 <code>Slave</code> 容器</li>
+<li>安装和配置 <code>NodeJS Plugin</code> 管理多个版本的 <code>Node.js</code></li>
+<li>新建 <code>Pipeline</code> 项目，验证 <code>Node.js</code> 安装</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://webpack-performance.com/2016/08/29/nodejs_in_jenkins_on_docker/" data-id="cisfrp5fs0004hrdgvqnj12wa" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jenkins/">jenkins</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/05/16/babel-runtime/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">合并 Babel 助手方法</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/jenkins/">jenkins</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/jenkins/" style="font-size: 10px;">jenkins</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/08/29/nodejs_in_jenkins_on_docker/">基于 Docker 搭建 Node.js + Jenkins 环境</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/16/babel-runtime/">合并 Babel 助手方法</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/25/statsd/">Webpack 关键指标监控</a>
+          </li>
+        
+          <li>
+            <a href="/2016/02/24/compress/">压缩 JS</a>
+          </li>
+        
+          <li>
+            <a href="/2015/07/06/alias/">使用别名做重定向</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 wyvernnot<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//cdn.staticfile.org/jquery/2.2.1/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
